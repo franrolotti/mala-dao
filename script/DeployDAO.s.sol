@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "forge-std/Script.sol";
+import "../src/Token.sol";
+import "../src/TimeLock.sol";
+import "../src/Governor.sol";
+
+contract DeployDAO is Script {
+    function run() external {
+        uint256 pk = vm.envUint("PRIVATE_KEY");          // set en .env
+        vm.startBroadcast(pk);
+
+        /* parámetros */
+        uint256 SUPPLY    = 1_000_000 * 1e18;
+        uint256 MIN_DELAY = 1 days;
+
+        /* 1. Token */
+        Token token = new Token(msg.sender, SUPPLY);
+
+        /* 2. Timelock sin proposers/exec por ahora */
+        TimeLock timelock = new TimeLock(
+            MIN_DELAY,
+            new address,
+            new address
+        );
+
+        /* 3. Governor */
+        GovernorDAO gov = new GovernorDAO(token, timelock);
+
+        /* 4. Asignar roles en Timelock */
+        timelock.grantRole(timelock.PROPOSER_ROLE(), address(gov));
+        timelock.grantRole(timelock.EXECUTOR_ROLE(), address(0)); // cualquiera
+
+        // seguridad: revocar admin al EOA
+        timelock.revokeRole(timelock.TIMELOCK_ADMIN_ROLE(), msg.sender);
+
+        vm.stopBroadcast();
+
+        console2.log("Token:", address(token));
+        console2.log("Timelock:", address(timelock));
+        console2.log("Governor:", address(gov));
+    }
+}
