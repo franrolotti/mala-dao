@@ -1,66 +1,49 @@
-## Foundry
+# Mala DAO – Solidity v0.8 / Foundry
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+A minimal, **production-ready skeleton** for an on-chain DAO built on OpenZeppelin v5:
 
-Foundry consists of:
+| Contract                | Purpose                                                  |
+|-------------------------|----------------------------------------------------------|
+| `Token.sol`             | ERC-20 governance token (`MGT`) with **ERC20Permit** + **ERC20Votes** (on-chain snapshots). |
+| `TimeLock.sol`          | Thin wrapper over `TimelockController`, deploys with empty proposer / executor arrays and a configurable `minDelay`. |
+| `Governor.sol`          | `Governor` + `CountingSimple` + `VotesQuorumFraction` + `TimelockControl`.<br>Parameters: 1-block delay, ~1-week period, 10 % quorum, 0 threshold. |
+| `DeployDAO.s.sol`       | Script that deploys Token → Timelock → Governor, wires the roles and revokes the deployer’s admin role. |
+| `GovernorFlow.t.sol`    | End-to-end test: create proposal → vote → queue → execute. |
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+---
 
-## Documentation
+## Quick start
 
-https://book.getfoundry.sh/
+```bash
+# Clone & install deps
+git clone https://github.com/<you>/mala-dao.git
+cd mala-dao
+forge install         # installs OpenZeppelin v5
 
-## Usage
+# Run tests
+forge test -vv
 
-### Build
+# Deploy (set PRIVATE_KEY & RPC_URL in .env)
+forge script script/DeployDAO.s.sol \
+  --rpc-url $RPC_URL \
+  --broadcast \
+  --verify
 
-```shell
-$ forge build
 ```
 
-### Test
+### Repo layout
 
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+```bash
+src/
+  Token.sol
+  TimeLock.sol
+  Governor.sol
+script/
+  DeployDAO.s.sol
+test/
+  GovernorFlow.t.sol
+lib/
+  openzeppelin-contracts/   # via forge install
+foundry.toml
+remappings.txt
 ```
