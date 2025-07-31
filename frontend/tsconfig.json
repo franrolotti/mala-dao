@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",               // <- ya suele estar
+    "paths": {
+      "@/*": ["src/*"]            // <-- alias “@” → /src
+    },
+    // resto de tus opciones …
+  }
+}

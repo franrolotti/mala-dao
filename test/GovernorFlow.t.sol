@@ -11,10 +11,11 @@ contract GovernorFlow is Test {
     TimeLock    timelock;
     GovernorDAO gov;
     address voter = address(0xBEEF);
+    address deployer = vm.addr(1);
 
     function setUp() public {
         token    = new Token(address(this), 1_000_000 * 1e18);
-        timelock = new TimeLock(1 days);                      // ← fixed
+        timelock = new TimeLock(1 days, deployer);                      // ← fixed
         gov      = new GovernorDAO(token, timelock);
 
         timelock.grantRole(timelock.PROPOSER_ROLE(), address(gov));

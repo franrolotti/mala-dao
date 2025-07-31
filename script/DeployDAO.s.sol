@@ -8,25 +8,23 @@ import "../src/Governor.sol";
 
 contract DeployDAO is Script {
     function run() external {
-        uint256 pk = vm.envUint("PRIVATE_KEY");
+        address deployer = vm.envAddress("DEPLOYER_ADDR"); // <- NEW
+        uint256 pk       = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(pk);
 
-        uint256 SUPPLY    = 1_000_000 * 1e18;
+        uint256 SUPPLY    = 1_000_000e18;
         uint256 MIN_DELAY = 1 days;
 
-        /* 1. Token */
-        Token token = new Token(msg.sender, SUPPLY);
-
-        /* 2. Timelock (only delay needed) */
-        TimeLock timelock = new TimeLock(MIN_DELAY);
-
-        /* 3. Governor */
+        Token token = new Token(deployer, SUPPLY);
+        TimeLock timelock = new TimeLock(MIN_DELAY, deployer);   // pass admin
         GovernorDAO gov = new GovernorDAO(token, timelock);
 
-        /* 4. Wire timelock roles */
+        // while deployer is still admin, grant roles
         timelock.grantRole(timelock.PROPOSER_ROLE(), address(gov));
-        timelock.grantRole(timelock.EXECUTOR_ROLE(), address(0)); // anyone
-        timelock.revokeRole(timelock.DEFAULT_ADMIN_ROLE(), msg.sender);
+        timelock.grantRole(timelock.EXECUTOR_ROLE(), address(0));   // anyone
+
+        // now drop admin so DAO is trust-less
+        timelock.revokeRole(timelock.DEFAULT_ADMIN_ROLE(), deployer);
 
         vm.stopBroadcast();
 
