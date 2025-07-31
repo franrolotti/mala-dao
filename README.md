@@ -16,7 +16,7 @@ A minimal, **production-ready skeleton** for an on-chain DAO built on OpenZeppel
 
 ```bash
 # Clone & install deps
-git clone https://github.com/<you>/mala-dao.git
+git clone https://github.com/franrolotti/mala-dao.git
 cd mala-dao
 forge install         # installs OpenZeppelin v5
 
